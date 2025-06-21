@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2013-2022 aevitas
+// Copyright (C) 2013-2022 aevitas
 // See the file LICENSE for copying permission.
 
 using BlueRain.Common;
@@ -36,14 +36,15 @@ namespace BlueRain
             ProcessAccess access, InjectorCreationOptions injectorOptions) : base(process, injectorOptions)
         {
             // If we instantiate an injector, the NativeMemory ctor will take care of opening a handle.
+            // In that case, we call EnterDebugMode() to elevate privileges, which are required for memory injection.
             // Otherwise, we'll have to open a handle here.
-            if (!injectorOptions.CreateInjector)
+            if (injectorOptions.CreateInjector)
+                Process.EnterDebugMode();
+            else
                 ProcessHandle = OpenProcess(access, false, process.Id);
 
             // Obtain a handle to the process' main thread so we can suspend/resume it whenever we need to.0
-            _mainThreadHandle = OpenThread(ThreadAccess.ALL, false, (uint) process.Threads[0].Id);
-
-            Process.EnterDebugMode();
+            _mainThreadHandle = OpenThread(ThreadAccess.ALL, false, (uint)process.Threads[0].Id);  
         }
 
         /// <summary>
@@ -112,7 +113,8 @@ namespace BlueRain
             ProcessHandle?.Dispose();
             _mainThreadHandle?.Dispose();
 
-            Process.LeaveDebugMode();
+            if (Injector != null)
+                Process.LeaveDebugMode();
 
             base.Dispose();
         }

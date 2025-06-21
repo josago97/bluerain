@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2013-2022 aevitas
+// Copyright (C) 2013-2022 aevitas
 // See the file LICENSE for copying permission.
 
 using System;
@@ -133,9 +133,6 @@ namespace BlueRain
                 return;
 
             Injector?.Dispose();
-
-            // Pretty much all we "have" to clean up.
-            Process.LeaveDebugMode();
 
             IsDisposed = true;
         }
